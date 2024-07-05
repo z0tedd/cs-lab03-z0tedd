@@ -1,17 +1,13 @@
+#include "histogram.h"
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
-#include <utility>
 #include <vector>
 using namespace std;
 vector<double> get_numbers(size_t number_count) {
   vector<double> numbers(number_count);
   for_each(numbers.begin(), numbers.end(), [](auto &x) { cin >> x; });
   return numbers;
-}
-template <typename T> pair<T, T> get_minmax(const vector<T> &numbers) {
-  auto it = minmax_element(numbers.begin(), numbers.end());
-  return make_pair(*(it.first), *(it.second));
 }
 vector<size_t> make_histogram(size_t bin_count, const vector<double> &numbers) {
   size_t number_count = numbers.size();
