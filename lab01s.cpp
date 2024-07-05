@@ -84,20 +84,54 @@ void svg_rect(double x, double y, double width, double height,
        << "' height='" << height << "' stroke ='" << stroke << "' fill ='"
        << fill << "'></rect>";
 }
-void show_histogram_svg(const vector<size_t> bins) {
+void show_histogram_svg(const vector<size_t> &bins) {
   const auto IMAGE_WIDTH = 400;
   const auto IMAGE_HEIGHT = 300;
   const auto TEXT_LEFT = 20;
   const auto TEXT_BASELINE = 20;
-  const auto TEXT_WIDTH = 50;
+  const auto TEXT_WIDTH = 60; // Раньше было 50
   const auto BIN_HEIGHT = 30;
   const auto BLOCK_WIDTH = 10;
   svg_begin(IMAGE_WIDTH, IMAGE_HEIGHT);
   double top = 0;
+
+  auto [min_count, max_count] = get_minmax(bins);
+  bool isScalable = false;
+  if (max_count * BLOCK_WIDTH > IMAGE_WIDTH) {
+    isScalable = true;
+  }
+  const size_t SCREEN_WIDTH = IMAGE_WIDTH;
+  const size_t MAX_ASTERISK = SCREEN_WIDTH - TEXT_WIDTH;
+
+  // for (size_t bin : bins) {
+  //   const double bin_width = BLOCK_WIDTH * bin;
+  //   svg_text(TEXT_LEFT, top + TEXT_BASELINE, to_string(bin));
+  //   svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT);
+  //   top += BIN_HEIGHT;
+  // }
+
   for (size_t bin : bins) {
-    const double bin_width = BLOCK_WIDTH * bin;
-    svg_text(TEXT_LEFT, top + TEXT_BASELINE, to_string(bin));
-    svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT);
+
+    double height = bin * BLOCK_WIDTH;
+    if (isScalable) {
+      height = MAX_ASTERISK * (static_cast<double>(bin) / max_count);
+      if (bin == max_count) {
+        height = MAX_ASTERISK;
+      }
+    }
+    cerr << '\n' << height;
+    // double bin_width = BLOCK_WIDTH * height; // раньше был конст, но я это
+    // убрал
+    //  В теории это вообще быть не должно, просто меня бесит не форматированный
+    //  текст
+    auto TEXT_ALIGN = 0;
+    if (bin <= 99)
+      TEXT_ALIGN += BLOCK_WIDTH;
+    if (bin <= 9)
+      TEXT_ALIGN += BLOCK_WIDTH;
+
+    svg_text(TEXT_LEFT + TEXT_ALIGN, top + TEXT_BASELINE, to_string(bin));
+    svg_rect(TEXT_WIDTH, top, height, BIN_HEIGHT);
     top += BIN_HEIGHT;
   }
   // svg_rect(TEXT_WIDTH, 0, bins[0] * BLOCK_WIDTH, BIN_HEIGHT);
